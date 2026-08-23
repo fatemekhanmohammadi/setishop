@@ -1,0 +1,45 @@
+services:
+  db:
+    container_name: db
+    image: postgres:15-alpine
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+    environment:
+      - PGDB_DB=${POSTGRES_DB}
+      - PGDB_USER=${POSTGRES_USER}
+      - PGDB_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    restart: always
+
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    volumes:
+      - ./core:/usr/src/app
+    working_dir: /usr/src/app
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    environment:
+      DEBUG: "1"
+    restart: always
+    depends_on:
+      - db
+
+  smtpdDev:
+    image: rnwood/smtp4dev:v3
+    restart: always
+    ports:
+      - '5000:80'
+      - '25:25'
+      - '143:143'
+    volumes:
+      - smtpDev-data:/smtpdDev
+    environment:
+      - ServerOptions__HostName=smtpdDev
+
+volumes:
+  smtpDev-data:
