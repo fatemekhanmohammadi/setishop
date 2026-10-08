@@ -1,0 +1,203 @@
+# 🛒 Setishop — Online Store
+
+https://github.com/fatemekhanmohammadi/setishop.git
+
+**API-first Backend** for a complete online store built with **Django + Django REST Framework**, without a frontend and focused on backend development and API design.
+
+## 🧱 Tech Stack
+
+* **Framework:** Django + Django REST Framework
+* **Authentication:** JWT (`djangorestframework-simplejwt`)
+* **Database:** PostgreSQL
+* **Cache / Broker:** Redis
+* **Async Processing:** Celery + Celery Beat
+* **API Documentation:** drf-spectacular (Swagger / ReDoc)
+* **Testing:** pytest + pytest-django
+* **Containerization:** Docker + Docker Compose
+* **CI/CD:** GitHub Actions
+* **Payment:** ZarinPal Sandbox
+
+## 📁 Project Structure
+
+```text
+core/          # Main settings, URLs and Celery configuration
+common/        # Pagination, permissions, responses and error handling
+accounts/      # Authentication, profile and password reset
+shop/          # Products, categories, brands, favorites and ratings
+cart/          # User and guest shopping carts
+orders/        # Order creation and management
+payments/      # Payment processing and ZarinPal integration
+```
+
+## ✨ Features
+
+### 🔐 Accounts
+
+* User registration and login with JWT (Access + Refresh)
+* View and update user profile
+* Password reset with asynchronous email sending via Celery
+* Custom User Model based on `AbstractUser`
+* Customer / Admin / Superuser roles
+
+### 🛍️ Shop
+
+* Product categories with subcategory support
+* Brand management
+* Product listing and detail
+* Search, filtering, sorting and pagination
+* Filtering by category, brand and price range
+* Multiple product image uploads
+* Product average rating
+* Product management with admin-only permissions
+* Product favorites
+* Product ratings and reviews; one rating per user for each product
+
+### 🛒 Cart
+
+* Session-based guest cart
+* Database-based cart for authenticated users
+* Add, remove and update quantity
+* Automatic guest cart merge after login
+* Duplicate item handling during merge
+* Abandoned cart reminder emails with Celery Beat
+
+### 📦 Orders
+
+* Convert Cart into Order
+* Store `price_at_purchase`
+* Calculate final price and shipping cost
+* View order list and details
+* Safe stock reduction using `select_for_update` and `transaction.atomic`
+* Race condition prevention
+
+### 💳 Payments
+
+* ZarinPal Sandbox integration
+* Payment link generation
+* Callback and transaction verification
+* Authority and Reference ID handling
+* Idempotent payment verification
+
+### ⚡ Redis & Celery
+
+* Caching for product lists and category queries
+* Asynchronous email sending
+* Password reset emails
+* Abandoned cart reminders
+* Periodic tasks with Celery Beat
+
+### 🧪 Testing
+
+Automated tests using:
+
+```text
+pytest + pytest-django
+```
+
+Including important scenarios such as:
+
+* Checkout
+* Cart Merge
+* Payment Verification
+* Payment Idempotency
+* Favorites
+* Ratings
+
+Run tests:
+
+```bash
+docker compose exec backend pytest -v
+```
+
+## 📚 API Documentation
+
+Interactive API documentation with **Swagger / drf-spectacular**:
+
+```text
+http://127.0.0.1:8000/api/docs/
+```
+
+## 📂 Sample Endpoints
+
+```http
+POST /accounts/api/register/
+POST /accounts/api/token/
+GET  /accounts/api/profile/
+
+GET  /shop/api/products/
+GET  /shop/api/products/{slug}/
+GET  /shop/api/categories/
+POST /shop/api/favorites/{product_id}/
+POST /shop/api/products/{product_id}/rate/
+
+GET  /shop/api/cart/
+POST /shop/api/cart/add/
+
+POST /orders/api/orders/checkout/
+GET  /orders/api/orders/
+
+POST /payments/api/payments/request/{order_id}/
+GET  /payments/api/payments/verify/
+```
+
+## 📮 Postman
+
+Postman files are included in the project:
+
+```text
+postman_collection.json
+```
+
+The collection includes:
+
+```text
+Auth / Shop / Cart / Favorites / Ratings / Orders / Payments
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+* Docker
+* Docker Compose
+
+### Setup
+
+cd setishop
+
+cp .env.example .env
+```
+
+Set required values such as `SECRET_KEY` and PostgreSQL credentials in `.env`.
+
+```bash
+docker compose up -d --build
+
+docker compose exec backend python manage.py migrate
+
+docker compose exec backend python manage.py createsuperuser
+```
+
+### Run Tests
+
+```bash
+docker compose exec backend pytest -v
+```
+
+### URLs
+
+```text
+API:     http://127.0.0.1:8000/
+Swagger: http://127.0.0.1:8000/api/docs/
+```
+
+## 🔄 CI/CD
+
+Project tests are automatically executed with **GitHub Actions** on:
+
+* Push
+* Pull Request
+
+## 👤 About
+
+Setishop was developed as a portfolio project to demonstrate **Python / Django / Django REST Framework backend development skills**.
