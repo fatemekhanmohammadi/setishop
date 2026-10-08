@@ -5,12 +5,14 @@ services:
     volumes:
       - ./postgres/data:/var/lib/postgresql/data
     environment:
-      - PGDB_DB=${POSTGRES_DB}
-      - PGDB_USER=${POSTGRES_USER}
-      - PGDB_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     restart: always
+    networks:
+      - app-network
 
   backend:
     container_name: backend
@@ -19,27 +21,86 @@ services:
       dockerfile: ./docker/Dockerfile
     volumes:
       - ./core:/usr/src/app
+      - ./.env:/usr/src/app/.env
     working_dir: /usr/src/app
     command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       DEBUG: "1"
     restart: always
     depends_on:
       - db
+    networks:
+      - app-network
 
   smtpdDev:
     image: rnwood/smtp4dev:v3
     restart: always
     ports:
-      - '5000:80'
-      - '25:25'
-      - '143:143'
+      - "8080:80"
+      - "25:25"
+      - "143:143"
     volumes:
       - smtpDev-data:/smtpdDev
     environment:
       - ServerOptions__HostName=smtpdDev
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  celery:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    command: celery -A core worker -l info
+    volumes:
+      - ./core:/usr/src/app
+      - ./.env:/usr/src/app/.env
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
+      - smtpdDev
+    environment:
+      DEBUG: "1"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    command: celery -A core beat -l info
+    volumes:
+      - ./core:/usr/src/app
+      - ./.env:/usr/src/app/.env
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
+      - smtpdDev
+    environment:
+      DEBUG: "1"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   smtpDev-data:

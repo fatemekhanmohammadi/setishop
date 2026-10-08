@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from decouple import config
+from celery.schedules import crontab
 
 
 AUTH_USER_MODEL = "accounts.User"
@@ -44,22 +45,34 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'accounts',
+    'shop',
+    'common',
+    'cart',
+    'payments',
+    'drf_spectacular',
+
 ]
+
+
 
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-
-    ),
+        'rest_framework_simplejwt.authentication.JWTAuthentication',),
     'DEFAULT_SCHEMA_CLASS': 
         'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_PAGINATION_CLASS': 'common.pagination.CustomPageNumberPagination',
+    'EXCEPTION_HANDLER': 'common.exceptions.custom_exception_handler',
 }
 
 
 
 
-
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Setishop API',
+    'DESCRIPTION': 'مستندات API فروشگاه ستی‌شاپ',
+    'VERSION': '1.0.0',
+}
 
 
 
@@ -159,7 +172,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-EMAIL_HOST = config("EMAIL_HOST", default="smtpddev")
+EMAIL_HOST = config("EMAIL_HOST", default="smtpdDev")
 
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool, default=False)
 
@@ -190,3 +203,29 @@ if SHOW_DEBUGGER_TOOLBAR:
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
     INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
     
+
+
+
+
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://redis:6379/1',
+    }
+}
+
+
+
+CELERY_BEAT_SCHEDULE = {
+    'send-abandoned-cart-emails': {
+        'task': 'cart.tasks.send_abandoned_cart_emails',
+        'schedule': crontab(hour=9, minute=0),  # هر روز ساعت ۹ صبح
+    },
+}
+
