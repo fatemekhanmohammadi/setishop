@@ -39,11 +39,10 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: |
-          cd core
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Run migrations
+        working-directory: ./core
         env:
           PGDB_NAME: setishop_test
           PGDB_USER: postgres
@@ -52,11 +51,10 @@ jobs:
           PGDB_PORT: 5432
           SECRET_KEY: test-secret-key
           DEBUG: "1"
-        run: |
-          cd core
-          python manage.py migrate
+        run: python manage.py migrate
 
       - name: Run tests
+        working-directory: ./core
         env:
           PGDB_NAME: setishop_test
           PGDB_USER: postgres
@@ -65,12 +63,9 @@ jobs:
           PGDB_PORT: 5432
           SECRET_KEY: test-secret-key
           DEBUG: "1"
-        run: |
-          cd core
-          pytest
+        run: pytest
 
       - name: Run flake8
         run: |
           pip install flake8
-          cd core
-          flake8 . --max-line-length=120 --exclude=migrations
+          flake8 core --max-line-length=120 --exclude=migrations
