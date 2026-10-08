@@ -63,6 +63,8 @@ jobs:
           PGDB_PORT: 5432
           SECRET_KEY: test-secret-key
           DEBUG: "1"
+          CELERY_BROKER_URL: redis://localhost:6379/0
+          CELERY_RESULT_BACKEND: redis://localhost:6379/0
         run: pytest
 
       - name: Run flake8
