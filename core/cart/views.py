@@ -39,7 +39,10 @@ class CheckoutView(APIView):
                 order.total_price = total + shipping_cost
                 order.save()
                 cart.cartitem_set.all().delete()
-            send_order_confirmation_email.delay(order.id)
+                try:
+                     send_order_confirmation_email.delay(order.id)
+                except Exception:
+                 pass
             return Response({'message': 'سفارش با موفقیت ثبت شد','order_id': order.id,'total_price': order.total_price}, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

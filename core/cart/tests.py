@@ -36,9 +36,7 @@ def test_cart_merge_on_login(client, user, product):
 def test_checkout_success(auth_client, user, product):
     cart = Cart.objects.create(user=user)
     CartItem.objects.create(cart=cart, product=product, quantity=2)
-
     response = auth_client.post('/cart/api/orders/checkout/', {'address': 'تهران'}, format='json')
-
     assert response.status_code == 201
     product.refresh_from_db()
     assert product.stock == 8  # 10 - 2
