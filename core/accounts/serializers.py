@@ -31,3 +31,18 @@ class ProfileSerializer(serializers.ModelSerializer):
         model=User
         fields=["id","username","email","first_name","last_name","role"]
         read_only_fields=["id","username","role"]
+
+
+#===================================================================================
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+#=============================================================================
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    new_password = serializers.CharField(min_length=8, write_only=True)
+
+#=============================================================================
