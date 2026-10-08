@@ -25,12 +25,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("SECRET_KEY", default="django-insecure-##g#d&#z+h!k6yq3h@f$*hz%c+nr9h_)u_ykte7uqva-_rbs@_")
+SECRET_KEY = config(
+    "SECRET_KEY", default="django-insecure-##g#d&#z+h!k6yq3h@f$*hz%c+nr9h_)u_ykte7uqva-_rbs@_")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", cast=bool, default=True)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=lambda v: [item.strip() for item in v.split(',')], default="*")
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=lambda v: [
+                       item.strip() for item in v.split(',')], default="*")
 
 
 # Application definition
@@ -54,18 +56,14 @@ INSTALLED_APPS = [
 ]
 
 
-
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',),
-    'DEFAULT_SCHEMA_CLASS': 
+    'DEFAULT_SCHEMA_CLASS':
         'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'common.pagination.CustomPageNumberPagination',
     'EXCEPTION_HANDLER': 'common.exceptions.custom_exception_handler',
 }
-
-
 
 
 SPECTACULAR_SETTINGS = {
@@ -73,9 +71,6 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'مستندات API فروشگاه ستی‌شاپ',
     'VERSION': '1.0.0',
 }
-
-
-
 
 
 MIDDLEWARE = [
@@ -165,11 +160,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-
-
-
-
-
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 EMAIL_HOST = config("EMAIL_HOST", default="smtpdDev")
@@ -185,13 +175,8 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 
 
-
-
-
-
-
-
-SHOW_DEBUGGER_TOOLBAR = config("SHOW_DEBUGGER_TOOLBAR", cast=bool, default=True)
+SHOW_DEBUGGER_TOOLBAR = config(
+    "SHOW_DEBUGGER_TOOLBAR", cast=bool, default=True)
 if SHOW_DEBUGGER_TOOLBAR:
     INSTALLED_APPS += [
         "debug_toolbar",
@@ -201,11 +186,8 @@ if SHOW_DEBUGGER_TOOLBAR:
     ]
     import socket  # only if you haven't already imported this
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
-    
-
-
-
+    INTERNAL_IPS = [
+        ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
 
 
 CELERY_BROKER_URL = 'redis://redis:6379/0'
@@ -221,7 +203,6 @@ CACHES = {
 }
 
 
-
 CELERY_BEAT_SCHEDULE = {
     'send-abandoned-cart-emails': {
         'task': 'cart.tasks.send_abandoned_cart_emails',
@@ -230,6 +211,5 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://redis:6379/0')
-CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://redis:6379/0')
-
-
+CELERY_RESULT_BACKEND = config(
+    'CELERY_RESULT_BACKEND', default='redis://redis:6379/0')

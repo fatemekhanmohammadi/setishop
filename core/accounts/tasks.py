@@ -2,7 +2,8 @@ from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
 
-#=============================================================================
+# =============================================================================
+
 
 @shared_task
 def send_password_reset_email(email, reset_link):
@@ -13,4 +14,4 @@ def send_password_reset_email(email, reset_link):
         recipient_list=[email],
     )
 
-#=============================================================================
+# =============================================================================

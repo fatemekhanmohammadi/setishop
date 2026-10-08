@@ -1,59 +1,58 @@
+from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
+from rest_framework import status
+from rest_framework.response import Response
+from .serializers import PasswordResetRequestSerializer, PasswordResetConfirmSerializer
+from .tasks import send_password_reset_email
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from drf_spectacular.utils import extend_schema, OpenApiExample
+from rest_framework.views import APIView
+from cart.utils import merge_session_cart_to_db
+from rest_framework_simplejwt.views import TokenObtainPairView
 from django.shortcuts import render
-from .serializers import RegisterSerializer,ProfileSerializer
+from .serializers import RegisterSerializer, ProfileSerializer
 from rest_framework import generics, permissions
 from django.contrib.auth import get_user_model
-User=get_user_model()
-from rest_framework_simplejwt.views import TokenObtainPairView
-from cart.utils import merge_session_cart_to_db
-from rest_framework.views import APIView
-from drf_spectacular.utils import extend_schema, OpenApiExample
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
-from .tasks import send_password_reset_email
-from .serializers import PasswordResetRequestSerializer, PasswordResetConfirmSerializer
-from rest_framework.response import Response
-from rest_framework import status
+User = get_user_model()
 
 token_generator = PasswordResetTokenGenerator()
-from rest_framework_simplejwt.views import TokenRefreshView,TokenVerifyView
 
 
-#================================================================================
+# ================================================================================
 
 @extend_schema(tags=['accounts'])
-
 class RegisterView(generics.CreateAPIView):
-    serializer_class=RegisterSerializer
-    permission_classes=[permissions.AllowAny]
+    serializer_class = RegisterSerializer
+    permission_classes = [permissions.AllowAny]
 
 
-#=======================================================================================
+# =======================================================================================
 @extend_schema(tags=['accounts'])
-
 class ProfileUpdateView(generics.RetrieveUpdateAPIView):
-    queryset=User.objects.all()
-    serializer_class=ProfileSerializer
-    permission_classes=[permissions.IsAuthenticated]
-    
+    queryset = User.objects.all()
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
         return self.request.user
 
-#=======================================================================================
-@extend_schema(tags=['accounts'])
+# =======================================================================================
 
+
+@extend_schema(tags=['accounts'])
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
-        response= super().post(request, *args, **kwargs)
+        response = super().post(request, *args, **kwargs)
         if response.status_code == 200:
             username = request.data.get('username')
             user = User.objects.filter(username=username).first()
             if user:
-              merge_session_cart_to_db(request, user)
+                merge_session_cart_to_db(request, user)
         return response
 
-#=============================================================================
+# =============================================================================
+
 
 class PasswordResetRequestView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -73,7 +72,8 @@ class PasswordResetRequestView(APIView):
         # همیشه پیام یکسان برمی‌گردونیم، حتی اگه ایمیل نباشه (برای امنیت، تا کسی نفهمه چه ایمیلی تو سیستم هست)
         return Response({'message': 'اگر این ایمیل در سیستم ثبت شده باشد، لینک بازیابی ارسال شد'})
 
-#=============================================================================
+# =============================================================================
+
 
 class PasswordResetConfirmView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -100,4 +100,4 @@ class PasswordResetConfirmView(APIView):
         return Response({'message': 'رمز عبور با موفقیت تغییر یافت'})
 
 
-#=============================================================================
+# =============================================================================

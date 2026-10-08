@@ -16,13 +16,16 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Payment',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('authority', models.CharField(blank=True, max_length=100)),
                 ('ref_id', models.CharField(blank=True, max_length=100)),
                 ('amount', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('status', models.CharField(choices=[('PENDING', 'pending'), ('PAID', 'paid'), ('FAILED', 'failed')], default='PENDING', max_length=20)),
+                ('status', models.CharField(choices=[('PENDING', 'pending'), (
+                    'PAID', 'paid'), ('FAILED', 'failed')], default='PENDING', max_length=20)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='cart.order')),
+                ('order', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='cart.order')),
             ],
         ),
     ]

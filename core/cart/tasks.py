@@ -5,7 +5,7 @@ from datetime import timedelta
 from .models import Cart
 
 
-#==========================================================================================================================
+# ==========================================================================================================================
 
 @shared_task
 def send_order_confirmation_email(order_id):
@@ -17,17 +17,18 @@ def send_order_confirmation_email(order_id):
             message=f'سفارش شما با مبلغ {order.total_price} ثبت شد.',
             from_email='noreply@setishop.com',
             recipient_list=[order.user.email],
-            fail_silently=False,  
+            fail_silently=False,
 
         )
 
 
-#==========================================================================================================================
+# ==========================================================================================================================
 
 @shared_task
 def send_abandoned_cart_emails():
     threshold = timezone.now() - timedelta(hours=24)
-    abandoned_carts = Cart.objects.filter(created_atlt=threshold, cartitemisnull=False).distinct()
+    abandoned_carts = Cart.objects.filter(
+        created_atlt=threshold, cartitemisnull=False).distinct()
 
     for cart in abandoned_carts:
         send_mail(

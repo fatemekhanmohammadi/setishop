@@ -12,9 +12,10 @@ ZARINPAL_REQUEST_URL = "https://sandbox.zarinpal.com/pg/v4/payment/request.json"
 ZARINPAL_VERIFY_URL = "https://sandbox.zarinpal.com/pg/v4/payment/verify.json"
 ZARINPAL_STARTPAY_URL = "https://sandbox.zarinpal.com/pg/StartPay/"
 
-#=======================================================================================================================
-@extend_schema(tags=['Pyments'])
+# =======================================================================================================================
 
+
+@extend_schema(tags=['Pyments'])
 class PaymentRequestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -35,7 +36,7 @@ class PaymentRequestView(APIView):
             "description": f"پرداخت سفارش {order.id}",
         }
 
-        response = requests.post(ZARINPAL_REQUEST_URL,json=data,timeout=10)
+        response = requests.post(ZARINPAL_REQUEST_URL, json=data, timeout=10)
 
         print("ZARINPAL STATUS:", response.status_code)
         print("ZARINPAL RESPONSE:", response.text)
@@ -53,8 +54,9 @@ class PaymentRequestView(APIView):
         return Response({'error': 'خطا در اتصال به درگاه پرداخت'}, status=status.HTTP_400_BAD_REQUEST)
 
 # =========================================================================================================================
-@extend_schema(tags=['Pyments'])
 
+
+@extend_schema(tags=['Pyments'])
 class PaymentVerifyView(APIView):
     def get(self, request):
         authority = request.GET.get('Authority')
@@ -90,5 +92,4 @@ class PaymentVerifyView(APIView):
         return Response({'error': 'پرداخت ناموفق بود'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-#=========================================================================================================================
+# =========================================================================================================================

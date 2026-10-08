@@ -6,7 +6,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 User = get_user_model()
 
 
-
 @pytest.fixture
 def user2(db):
     return User.objects.create_user(username='user2', email='user2@example.com', password='testpass123')
@@ -15,7 +14,6 @@ def user2(db):
 @pytest.fixture
 def api_client():
     return APIClient()
-
 
 
 @pytest.fixture

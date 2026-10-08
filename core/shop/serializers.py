@@ -1,12 +1,10 @@
 from rest_framework import serializers
-from .models import Category, Brand, Product, ProductImage,FavoriteProduct,ProductRating
+from .models import Category, Brand, Product, ProductImage, FavoriteProduct, ProductRating
 
 from django.db.models import Avg
 
 
-
-
-#======================================================================================================
+# ======================================================================================================
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -15,7 +13,7 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'slug', 'parent']
 
 
-#======================================================================================================
+# ======================================================================================================
 
 
 class BrandSerializer(serializers.ModelSerializer):
@@ -23,7 +21,7 @@ class BrandSerializer(serializers.ModelSerializer):
         model = Brand
         fields = ['id', 'title', 'slug']
 
-#======================================================================================================
+# ======================================================================================================
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -32,7 +30,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image', 'is_main']
 
 
-#======================================================================================================
+# ======================================================================================================
 class ProductListSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     brand = BrandSerializer(read_only=True)
@@ -40,7 +38,8 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'title', 'slug', 'price', 'stock', 'category', 'brand', 'main_image', 'is_active']
+        fields = ['id', 'title', 'slug', 'price', 'stock',
+                  'category', 'brand', 'main_image', 'is_active']
 
     def get_main_image(self, obj):
         main = obj.images.filter(is_main=True).first()
@@ -50,7 +49,8 @@ class ProductListSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(url) if request else url
         return None
 
-#=====================================================================================================
+# =====================================================================================================
+
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
@@ -60,27 +60,28 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'title', 'slug', 'description', 'price', 'stock', 'category', 'brand', 'images', 'average_rating', 'is_active', 'created_at']
+        fields = ['id', 'title', 'slug', 'description', 'price', 'stock',
+                  'category', 'brand', 'images', 'average_rating', 'is_active', 'created_at']
 
     def get_average_rating(self, obj):
         result = obj.ratings.aggregate(Avg('score'))
         return result['score__avg']
-    
-#======================================================================================================
+
+# ======================================================================================================
+
 
 class FavoriteProductSerializer(serializers.ModelSerializer):
-     class Meta:
-         model=FavoriteProduct
-         fields=['id', 'user','product','created_at']
+    class Meta:
+        model = FavoriteProduct
+        fields = ['id', 'user', 'product', 'created_at']
 
 
-
-#=======================================================================================================
+# =======================================================================================================
 
 
 class ProductRatingSerializer(serializers.ModelSerializer):
-    
-     class Meta:
-         model=ProductRating
-         fields=['id', 'user','product','comment','score','created_at']
-         read_only_fields = ['user']
+
+    class Meta:
+        model = ProductRating
+        fields = ['id', 'user', 'product', 'comment', 'score', 'created_at']
+        read_only_fields = ['user']
