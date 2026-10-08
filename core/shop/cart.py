@@ -6,9 +6,9 @@ User = get_user_model()
 class Cart:
     def __init__(self, request):
         self.session = request.session
-        cart = self.session.get('cart')
+        cart = self.session.get("cart")
         if not cart:
-            cart = self.session['cart'] = {}
+            cart = self.session["cart"] = {}
         self.cart = cart
 
     def add(self, product, quantity=1):
@@ -41,6 +41,7 @@ class Cart:
 
     def get_items(self):
         from .models import Product
+
         product_ids = self.cart.keys()
         products = Product.objects.filter(id__in=product_ids)
         items = []
@@ -50,5 +51,10 @@ class Cart:
             item_total = product.price * quantity
             total += item_total
             items.append(
-                {'product': product, 'quantity': quantity, 'item_total': item_total, })
+                {
+                    "product": product,
+                    "quantity": quantity,
+                    "item_total": item_total,
+                }
+            )
         return items, total

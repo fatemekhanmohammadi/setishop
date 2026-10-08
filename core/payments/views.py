@@ -1,11 +1,12 @@
 import requests
-from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema
+from rest_framework import permissions, status
 from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.conf import settings
+from rest_framework.views import APIView
+
 from cart.models import Order
+
 from .models import Payment
-from drf_spectacular.utils import extend_schema, OpenApiExample
 
 MERCHANT_ID = "1952217b-a176-4c48-9012-8e3a5d7c6097"  # تو .env بذار بعداً
 ZARINPAL_REQUEST_URL = "https://sandbox.zarinpal.com/pg/v4/payment/request.json"
@@ -15,18 +16,19 @@ ZARINPAL_STARTPAY_URL = "https://sandbox.zarinpal.com/pg/StartPay/"
 # =======================================================================================================================
 
 
-@extend_schema(tags=['Pyments'])
+@extend_schema(tags=["Pyments"])
 class PaymentRequestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, order_id):
         order = Order.objects.filter(id=order_id, user=request.user).first()
         if not order:
-            return Response({'error': 'سفارش یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "سفارش یافت نشد"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         payment, created = Payment.objects.get_or_create(
-            order=order,
-            defaults={'amount': order.total_price}
+            order=order, defaults={"amount": order.total_price}
         )
 
         data = {
@@ -47,27 +49,31 @@ class PaymentRequestView(APIView):
             authority = result["data"]["authority"]
             payment.authority = authority
             payment.save()
-            return Response({
-                'payment_url': ZARINPAL_STARTPAY_URL + authority
-            })
+            return Response({"payment_url": ZARINPAL_STARTPAY_URL + authority})
 
-        return Response({'error': 'خطا در اتصال به درگاه پرداخت'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "خطا در اتصال به درگاه پرداخت"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
 
 # =========================================================================================================================
 
 
-@extend_schema(tags=['Pyments'])
+@extend_schema(tags=["Pyments"])
 class PaymentVerifyView(APIView):
     def get(self, request):
-        authority = request.GET.get('Authority')
+        authority = request.GET.get("Authority")
         payment = Payment.objects.filter(authority=authority).first()
 
         if not payment:
-            return Response({'error': 'تراکنش یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "تراکنش یافت نشد"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         # idempotent: اگه قبلاً پردازش شده، دوباره پردازش نکن
         if payment.status == Payment.StatusType.PAID:
-            return Response({'message': 'این تراکنش قبلاً تایید شده است'})
+            return Response({"message": "این تراکنش قبلاً تایید شده است"})
 
         data = {
             "merchant_id": MERCHANT_ID,
@@ -85,11 +91,15 @@ class PaymentVerifyView(APIView):
             payment.order.status = "PAID"
             payment.order.save()
 
-            return Response({'message': 'پرداخت با موفقیت انجام شد', 'ref_id': payment.ref_id})
+            return Response(
+                {"message": "پرداخت با موفقیت انجام شد", "ref_id": payment.ref_id}
+            )
 
         payment.status = Payment.StatusType.FAILED
         payment.save()
-        return Response({'error': 'پرداخت ناموفق بود'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "پرداخت ناموفق بود"}, status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 # =========================================================================================================================

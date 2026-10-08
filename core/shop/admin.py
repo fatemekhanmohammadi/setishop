@@ -1,22 +1,27 @@
-from .models import Category, Brand, Product, ProductImage, FavoriteProduct
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+
+from .models import Brand, Category, FavoriteProduct, Product, ProductImage
+
 User = get_user_model()
 
 
 # ===============================================================================
 
+
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
     extra = 1
+
 
 # ===============================================================================
 
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['title', 'price', 'stock', 'category', 'is_active']
+    list_display = ["title", "price", "stock", "category", "is_active"]
     inlines = [ProductImageInline]
+
 
 # ===============================================================================
 

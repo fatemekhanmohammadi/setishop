@@ -1,8 +1,8 @@
-from rest_framework import serializers
-from .models import Category, Brand, Product, ProductImage, FavoriteProduct, ProductRating
-
 from django.db.models import Avg
+from rest_framework import serializers
 
+from .models import (Brand, Category, FavoriteProduct, Product, ProductImage,
+                     ProductRating)
 
 # ======================================================================================================
 
@@ -10,7 +10,7 @@ from django.db.models import Avg
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'title', 'slug', 'parent']
+        fields = ["id", "title", "slug", "parent"]
 
 
 # ======================================================================================================
@@ -19,7 +19,8 @@ class CategorySerializer(serializers.ModelSerializer):
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ['id', 'title', 'slug']
+        fields = ["id", "title", "slug"]
+
 
 # ======================================================================================================
 
@@ -27,7 +28,7 @@ class BrandSerializer(serializers.ModelSerializer):
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
-        fields = ['id', 'image', 'is_main']
+        fields = ["id", "image", "is_main"]
 
 
 # ======================================================================================================
@@ -38,16 +39,26 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'title', 'slug', 'price', 'stock',
-                  'category', 'brand', 'main_image', 'is_active']
+        fields = [
+            "id",
+            "title",
+            "slug",
+            "price",
+            "stock",
+            "category",
+            "brand",
+            "main_image",
+            "is_active",
+        ]
 
     def get_main_image(self, obj):
         main = obj.images.filter(is_main=True).first()
         if main:
-            request = self.context.get('request')
+            request = self.context.get("request")
             url = main.image.url
             return request.build_absolute_uri(url) if request else url
         return None
+
 
 # =====================================================================================================
 
@@ -60,12 +71,25 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'title', 'slug', 'description', 'price', 'stock',
-                  'category', 'brand', 'images', 'average_rating', 'is_active', 'created_at']
+        fields = [
+            "id",
+            "title",
+            "slug",
+            "description",
+            "price",
+            "stock",
+            "category",
+            "brand",
+            "images",
+            "average_rating",
+            "is_active",
+            "created_at",
+        ]
 
     def get_average_rating(self, obj):
-        result = obj.ratings.aggregate(Avg('score'))
-        return result['score__avg']
+        result = obj.ratings.aggregate(Avg("score"))
+        return result["score__avg"]
+
 
 # ======================================================================================================
 
@@ -73,7 +97,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 class FavoriteProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = FavoriteProduct
-        fields = ['id', 'user', 'product', 'created_at']
+        fields = ["id", "user", "product", "created_at"]
 
 
 # =======================================================================================================
@@ -83,5 +107,5 @@ class ProductRatingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductRating
-        fields = ['id', 'user', 'product', 'comment', 'score', 'created_at']
-        read_only_fields = ['user']
+        fields = ["id", "user", "product", "comment", "score", "created_at"]
+        read_only_fields = ["user"]
